@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Caption Generator</title>
+    <style>
+        /* Basic reset and styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5ff;
+        }
+
+        /* Container styling */
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        /* Header and subtitle styling */
+        .container h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .container p {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        /* File input styling */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Displayed image styling */
+        #selectedImage {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* Generate button styling */
+        button {
+            width: 100%;
+            background-color: #6254e8;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #5345d4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Medical Image Caption Generator</h1>
+      
+        <form id="uploadForm" enctype="multipart/form-data">
+            <!-- File upload input -->
+            <div class="form-group">
+                <label for="imageInput">Upload Image</label>
+                <input type="file" id="imageInput" name="image" accept="image/*" onchange="displayImage(event)">
+            </div>
+
+            <!-- Display selected image -->
+            <img id="selectedImage" alt="Selected Image">
+
+            <!-- Generate caption button -->
+            <button type="button" onclick="generateCaption()">Generate Captions</button>
+        </form>
+
+        <p id="captionResult" style="margin-top: 20px; font-weight: bold; color: #333;"></p>
+    </div>
+
+    <script>
+        // Display the selected image on the webpage
+        function displayImage(event) {
+            const selectedImage = document.getElementById('selectedImage');
+            const file = event.target.files[0];
+
+            if (file) {
+                selectedImage.src = URL.createObjectURL(file);
+                selectedImage.style.display = 'block';
+            } else {
+                selectedImage.style.display = 'none';
+            }
+        }
+
+        async function generateCaption() {
+            const formData = new FormData();
+            const imageInput = document.getElementById('imageInput').files[0];
+
+            if (!imageInput) {
+                document.getElementById("captionResult").innerText = "Please select an image first.";
+                return;
+            }
+
+            formData.append("image", imageInput);
+
+            const response = await fetch("http://127.0.0.1:5000/generate-caption", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                document.getElementById("captionResult").innerHTML = "Caption: " + result.caption;
+            } else {
+                document.getElementById("captionResult").innerText = "Error: " + result.error;
+            }
+        }
+    </script>
+</body>
+</html>
